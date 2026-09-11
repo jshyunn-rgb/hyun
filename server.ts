@@ -325,6 +325,27 @@ app.post('/api/save-sheet', async (req, res) => {
   }
 });
 
+// Explicit routes for Open Graph Images with CORS, correct mime types, and public cache
+app.get(['/og-image.jpg', '/og-image.png'], (req, res) => {
+  const isPng = req.path.endsWith('.png');
+  const publicPath = path.join(process.cwd(), 'public', isPng ? 'og-image.png' : 'og-image.jpg');
+  res.setHeader('Content-Type', isPng ? 'image/png' : 'image/jpeg');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.sendFile(publicPath);
+});
+
+// Helper to inject current request host into Open Graph meta tags
+function injectOpenGraphTags(html: string, req: express.Request): string {
+  const proto = (req.headers['x-forwarded-proto'] as string) || 'https';
+  const host = (req.headers['x-forwarded-host'] as string) || req.headers.host || 'ais-pre-nvlqz5v4av2dngu3wwhgm5-497417192682.asia-east1.run.app';
+  const baseUrl = `${proto}://${host}`;
+
+  return html
+    .replace(/https:\/\/ais-pre-nvlqz5v4av2dngu3wwhgm5-497417192682\.asia-east1\.run\.app\/og-image\.jpg\?v=2/g, `${baseUrl}/og-image.jpg?v=2`)
+    .replace(/https:\/\/ais-pre-nvlqz5v4av2dngu3wwhgm5-497417192682\.asia-east1\.run\.app\//g, `${baseUrl}/`);
+}
+
 // Start server with Vite middleware for dev or static serving for prod
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
@@ -332,12 +353,41 @@ async function startServer() {
       server: { middlewareMode: true },
       appType: 'spa',
     });
+
+    // Handle bot / crawler requests in dev mode to ensure valid absolute OG tags
+    app.use(async (req, res, next) => {
+      const userAgent = req.headers['user-agent'] || '';
+      const isCrawler = /kakaotalk-scrap|facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|TelegramBot|WhatsApp|Discordbot/i.test(userAgent);
+
+      if (isCrawler && req.method === 'GET' && (req.path === '/' || req.path === '/index.html')) {
+        try {
+          const indexPath = path.join(process.cwd(), 'index.html');
+          const rawHtml = await vite.transformIndexHtml(req.url, await import('fs').then((fs) => fs.promises.readFile(indexPath, 'utf-8')));
+          const injectedHtml = injectOpenGraphTags(rawHtml, req);
+          res.setHeader('Content-Type', 'text/html; charset=utf-8');
+          return res.send(injectedHtml);
+        } catch (e) {
+          console.error('Error serving crawler HTML in dev:', e);
+        }
+      }
+      next();
+    });
+
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+    app.get('*', async (req, res) => {
+      const fs = await import('fs');
+      const indexPath = path.join(distPath, 'index.html');
+      try {
+        const rawHtml = await fs.promises.readFile(indexPath, 'utf-8');
+        const injectedHtml = injectOpenGraphTags(rawHtml, req);
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.send(injectedHtml);
+      } catch {
+        res.sendFile(indexPath);
+      }
     });
   }
 
