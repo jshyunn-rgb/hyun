@@ -338,11 +338,12 @@ app.get(['/og-image.jpg', '/og-image.png'], (req, res) => {
 // Helper to inject current request host into Open Graph meta tags
 function injectOpenGraphTags(html: string, req: express.Request): string {
   const proto = (req.headers['x-forwarded-proto'] as string) || 'https';
-  const host = (req.headers['x-forwarded-host'] as string) || req.headers.host || 'ais-pre-nvlqz5v4av2dngu3wwhgm5-497417192682.asia-east1.run.app';
+  const host = (req.headers['x-forwarded-host'] as string) || req.headers.host || 'hyun-sy51.vercel.app';
   const baseUrl = `${proto}://${host}`;
 
   return html
-    .replace(/https:\/\/ais-pre-nvlqz5v4av2dngu3wwhgm5-497417192682\.asia-east1\.run\.app\/og-image\.jpg(\?[^"']*)?/g, `${baseUrl}/og-image.jpg?v=3`)
+    .replace(/https:\/\/[^"'\s]+\/og-image\.jpg(\?[^"']*)?/g, `${baseUrl}/og-image.jpg?v=3`)
+    .replace(/https:\/\/hyun-sy51\.vercel\.app\//g, `${baseUrl}/`)
     .replace(/https:\/\/ais-pre-nvlqz5v4av2dngu3wwhgm5-497417192682\.asia-east1\.run\.app\//g, `${baseUrl}/`);
 }
 
