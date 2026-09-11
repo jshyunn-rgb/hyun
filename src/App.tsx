@@ -19,6 +19,7 @@ import {
   ExternalLink,
   ClipboardCheck,
   Link as LinkIcon,
+  Share2,
 } from 'lucide-react';
 import { SensorProduct } from './types';
 import { SENSOR_PRODUCTS, GOOGLE_APPS_SCRIPT_URL } from './config';
@@ -26,6 +27,7 @@ import { QuestionCard } from './components/QuestionCard';
 import { GasGuideModal } from './components/GasGuideModal';
 import { VoiceMemoRecorder } from './components/VoiceMemoRecorder';
 import { SheetExportModal } from './components/SheetExportModal';
+import { OgPreviewModal } from './components/OgPreviewModal';
 
 export default function App() {
   // 1. Selected product (default: '압력센서')
@@ -61,6 +63,7 @@ export default function App() {
   });
   const [isGuideModalOpen, setIsGuideModalOpen] = useState<boolean>(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
+  const [isOgModalOpen, setIsOgModalOpen] = useState<boolean>(false);
   const [allCopied, setAllCopied] = useState<boolean>(false);
   const [isCopiedForSheet, setIsCopiedForSheet] = useState<boolean>(false);
   const [isCopiedUrl, setIsCopiedUrl] = useState<boolean>(false);
@@ -388,22 +391,36 @@ export default function App() {
             </div>
           </div>
 
-          {/* Apps Script Connection Button */}
-          <button
-            type="button"
-            id="open-gas-settings-btn"
-            onClick={() => setIsGuideModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="hidden sm:inline">Google Sheet 설정 및 연동 가이드</span>
-            <span className="sm:hidden">시트 연동</span>
-            {gasUrl ? (
-              <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block ml-0.5" title="연동 URL 설정됨" />
-            ) : (
-              <span className="w-2 h-2 rounded-full bg-amber-400 inline-block ml-0.5" title="URL 미설정" />
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            {/* OG Social Share Preview Button */}
+            <button
+              type="button"
+              id="open-og-preview-btn"
+              onClick={() => setIsOgModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+              title="카카오톡, 슬랙 등 SNS 공유 시 노출되는 오픈그래프 카드를 미리 봅니다."
+            >
+              <Share2 className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="hidden md:inline">SNS 공유 카드</span>
+            </button>
+
+            {/* Apps Script Connection Button */}
+            <button
+              type="button"
+              id="open-gas-settings-btn"
+              onClick={() => setIsGuideModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden sm:inline">Google Sheet 설정 및 연동 가이드</span>
+              <span className="sm:hidden">시트 연동</span>
+              {gasUrl ? (
+                <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block ml-0.5" title="연동 URL 설정됨" />
+              ) : (
+                <span className="w-2 h-2 rounded-full bg-amber-400 inline-block ml-0.5" title="URL 미설정" />
+              )}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -937,6 +954,12 @@ export default function App() {
         date={new Date().toISOString().split('T')[0]}
         onSaveToGas={handleSaveToGoogleSheet}
         isSavingGas={isSaving}
+      />
+
+      {/* Open Graph Social Share Card Preview Modal */}
+      <OgPreviewModal
+        isOpen={isOgModalOpen}
+        onClose={() => setIsOgModalOpen(false)}
       />
     </div>
   );
