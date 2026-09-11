@@ -16,7 +16,7 @@ export const OgPreviewModal: React.FC<OgPreviewModalProps> = ({ isOpen, onClose 
 
   const currentUrl = typeof window !== 'undefined' ? window.location.href : 'https://ais-pre-nvlqz5v4av2dngu3wwhgm5-497417192682.asia-east1.run.app';
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://ais-pre-nvlqz5v4av2dngu3wwhgm5-497417192682.asia-east1.run.app';
-  const fullOgImageUrl = `${origin}/og-image.jpg?v=2`;
+  const fullOgImageUrl = `${origin}/og-image.jpg?v=3`;
 
   const handleCopyUrl = async () => {
     try {

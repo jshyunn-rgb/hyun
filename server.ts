@@ -342,7 +342,7 @@ function injectOpenGraphTags(html: string, req: express.Request): string {
   const baseUrl = `${proto}://${host}`;
 
   return html
-    .replace(/https:\/\/ais-pre-nvlqz5v4av2dngu3wwhgm5-497417192682\.asia-east1\.run\.app\/og-image\.jpg\?v=2/g, `${baseUrl}/og-image.jpg?v=2`)
+    .replace(/https:\/\/ais-pre-nvlqz5v4av2dngu3wwhgm5-497417192682\.asia-east1\.run\.app\/og-image\.jpg(\?[^"']*)?/g, `${baseUrl}/og-image.jpg?v=3`)
     .replace(/https:\/\/ais-pre-nvlqz5v4av2dngu3wwhgm5-497417192682\.asia-east1\.run\.app\//g, `${baseUrl}/`);
 }
 
